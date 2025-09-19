@@ -29,6 +29,8 @@ fi
 
 IMAGE_NAME=$1
 
+TIMEOUT_SECONDS=15
+
 # --- Create a directory for the reports ---
 OUTPUT_DIR="boe_${IMAGE_NAME//[:\/]/-}"
 mkdir -p "$OUTPUT_DIR"
@@ -57,7 +59,15 @@ echo ""
 
 # --- 3. Explore the filesystem within a temporary container ---
 echo "--- 3. Filesystem Tree (ls -R) ---"
-docker run --rm -it "$IMAGE_NAME" ls -R / 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' > "$OUTPUT_DIR/filesystem_tree.txt"
+# Run the docker command with a timeout
+  timeout "$TIMEOUT_SECONDS" docker run --rm -it "$image" ls -R / 2>/dev/null | \
+    sed 's/\x1b\[[0-9;]*m//g' > "$OUTPUT_DIR/filesystem_tree.txt"
+
+  # Check the exit status of the timeout command
+  if [ $? -eq 124 ]; then
+    echo "Warning: Unable to obtainer a file tree for image '$image' timed out after $TIMEOUT_SECONDS seconds." | tee -a "$OUTPUT_DIR/filesystem_tree.txt"
+  fi
+#docker run --rm -it "$IMAGE_NAME" ls -R / 2>/dev/null | sed 's/\x1b\[[0-9;]*m//g' > "$OUTPUT_DIR/filesystem_tree.txt"
 echo "Saved to $OUTPUT_DIR/filesystem_tree.txt"
 echo ""
 
