@@ -97,7 +97,7 @@ trivy image \
 trivy image \
   --severity HIGH,CRITICAL,MEDIUM,LOW \
   --ignore-status unknown,not_affected,will_not_fix \
-  --format template --template "@template-html.tpl" \
+  --format template --template "@template-html-report.tpl" \
   --output "$OUTPUT_DIR/trivy_scan_report.html" \
   "$IMAGE_NAME"
 trivy image \
